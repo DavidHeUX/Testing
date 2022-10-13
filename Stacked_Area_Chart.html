@@ -1,0 +1,220 @@
+<!-- Code reference from https://d3-graph-gallery.com/graph/stackedarea_wideinput.html -->
+<!-- Basic stacked area chart from wide input format by Yan Holtz -->
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDEA9301, A2 Area Chart</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="areachart"></div>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script>
+
+      // set the dimensions and margins of the graph
+      const margin = {top: 70, right: 30, bottom: 70, left: 50},
+          width = 960 - margin.left - margin.right,
+          height = 500 - margin.top - margin.bottom;
+      
+      // append the svg object to the body of the page
+      const svg = d3.select("#areachart")
+        .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+          .attr("transform",
+                `translate(${margin.left}, ${margin.top})`);
+
+      // Time Parser
+      const parseTime = d3.timeParse("%Y/%m/%d");
+
+      // Read the data
+      d3.csv("https://raw.githubusercontent.com/DavidHeUX/Testing/master/areachart-data-updated.csv").then( data => {
+        
+        // clean data referred from 04_Week3_LineChartWithD3.html
+        data.forEach(d => {
+          d.date = parseTime(d.week)
+          d.cannabis = +d.cannabis;
+          d.others = +d.others;
+          d.dealing = +d.dealing;
+        });
+        console.log(data);
+        
+        // List of groups = header of the csv files
+        const keys = data.columns.slice(1,3)
+        console.log("This is the keys: ", keys);
+
+       
+        // Add X axis --> it is a date format
+          const xScale = d3.scaleTime()
+					.domain([d3.min(data, function(d) { return +d.date; }),d3.max(data, function(d) { return +d.date; })])
+					.range([0,width]);
+          
+				console.log(xScale.domain());
+				console.log(xScale.range());
+
+        svg.append("g")
+          .attr("transform", `translate(0, ${height})`)
+          .call(d3.axisBottom(xScale).ticks(5));
+
+
+         // Add Y axis
+         const yScale = d3.scaleLinear()
+          .domain([0, d3.max(data, function(d) { return (d.cannabis+d.others); })])
+          .range([ height, 0 ]);
+        svg.append("g")
+          .call(d3.axisLeft(yScale).ticks(5));
+        
+      
+        // color palette
+        const color = d3.scaleOrdinal()
+          .domain(keys)
+          .range(['#9747FF','#4482DF','#F4BE37']) 
+
+        // stack the data
+        const stackedData = d3.stack()
+          .keys(keys)
+          (data)
+          console.log("This is the stack result: ", stackedData)
+      
+        // Show the areas
+        svg
+          .selectAll("mylayers")
+          .data(stackedData)
+          .join("path")
+            .style("fill", function(d) { return color(d.key); })
+            .attr("d", d3.area()
+              .x(function(d, i) { return xScale(d.data.date); })
+              .y0(function(d) { return yScale(d[0]); })
+              .y1(function(d) { return yScale(d[1]); })
+          )
+        
+        // update keys for second sketch
+        const newkeys = data.columns.slice(-1)
+        console.log("This is the keys: ", newkeys);
+
+         // stack the data
+         const dealingData = d3.stack()
+          .keys(newkeys)
+          (data)
+          console.log("This is the stack result: ", dealingData)
+      
+      
+        // Show the areas
+        svg
+          .selectAll("mylayers")
+          .data(dealingData)
+          .join("path")
+            .style("fill", function(d) { return color(d.key); })
+            .style("fill-opacity", '100%')
+            .attr("d", d3.area()
+              .x(function(d, i) { return xScale(d.data.date); })
+              .y0(function(d) { return yScale(d[0]); })
+              .y1(function(d) { return yScale(d[1]); })
+          )
+      })
+
+      // Draw legend and small texts
+      svg.append("circle")
+            .attr("transform", `translate(0, ${height})`)
+            .attr("cx",width/2-50)
+            .attr("cy",40)
+            .attr("r", 6)
+            .style("fill", "#9747FF")
+
+      svg.append("circle")
+            .attr("transform", `translate(0, ${height})`)
+            .attr("cx",width/2-50+120)
+            .attr("cy",40)
+            .attr("r", 6)
+            .style("fill", "#4482DF")
+
+      svg.append("circle")
+            .attr("transform", `translate(0, ${height})`)
+            .attr("cx",width/2-70-120)
+            .attr("cy",40)
+            .attr("r", 6)
+            .style("fill", "#F4BE37")
+
+      svg.append("text")
+            .attr("transform", `translate(0, ${height})`)
+            .attr("x", width/2-70-120+20)
+            .attr("y", 40)
+            .text("Drug Dealing")
+            .style("font-size", "15px")
+            .attr("alignment-baseline","middle")
+
+      svg.append("text")
+            .attr("transform", `translate(0, ${height})`)
+            .attr("x", width/2-50+20)
+            .attr("y", 40)
+            .text("Cannabis")
+            .style("font-size", "15px")
+            .attr("alignment-baseline","middle")
+
+      svg.append("text")
+            .attr("transform", `translate(0, ${height})`)
+            .attr("x", width/2-50+120+20)
+            .attr("y", 40)
+            .text("Other Drugs")
+            .style("font-size", "15px")
+            .attr("alignment-baseline","middle")
+
+      svg.append("text")
+   					.attr("transform", `translate(0, ${height})`)
+   					.attr("x", -10)
+   					.attr("y", 15.5)
+   					.attr("font-size", "10.5px")
+   					.attr("font", "sans-serif")
+   					.text("2015")
+
+      svg.append("text")
+   					.attr("x", -30)
+   					.attr("y", -10)
+   					.attr("font-size", "11px")
+   					.attr("font", "sans-serif")
+   					.text("Number of Recorded Cases")
+      
+      svg.append("text")
+            .attr("transform", `translate(${width}, ${height})`)
+   					.attr("x", -10)
+   					.attr("y", 15.5)
+   					.attr("font-size", "11px")
+   					.attr("font", "sans-serif")
+   					.text("Year")
+      
+      // Draw source text
+      svg.append("text")
+   					.attr("transform", `translate(0, ${height})`)
+   					.attr("x", 100)
+   					.attr("y", 70)
+   					.attr("font-size", "12px")
+   					.attr("font", "sans-serif")
+   					.text("Data Source: Bureau of Crime Statistics and Research (2020) Summary of COVID-19 Pandemic and crime trends in NSW Data.")
+
+      // Draw title text
+      svg.append("text")
+   					.attr("x", 20)
+   					.attr("y", -40)
+   					.attr("font-size", "24px")
+   					.attr("font", "sans-serif")
+            .style("alignment-baseline","middle")
+   					.text("Number of Drug Possession/Use by Type in NSW from Jan 2015 to Apr 2020")
+
+      </script>
+  </body>
+</html>
