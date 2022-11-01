@@ -1,15 +1,15 @@
-﻿name,parent,value,
-origin,,,
-Cut/Pierce,origin,"2,970",
-Drowning (includes water transport),origin,524,
-Fall,origin,"1,088",
-Fire/burn,origin,294,
-Firearm,origin,"44,287",
-"Transport, other land",origin,260,
-Struck by/against,origin,265,
-Suffocation,origin,"12,910",
-Other specified and classifiable,origin,842,
-Other specified / NEC,origin,704,
-Unspecified,origin,"1,484",
-Drug Poisoning,origin,"4,497",
-Non-Drug Poisoning,origin,"1,210",
+﻿name,parent,value,suicide,homicide,legal
+origin,,,,,
+Cut/Pierce,origin,2970,2063,907,0
+Drowning (includes water transport),origin,524,498,26,0
+Fall,origin,1088,1074,14,0
+Fire/burn,origin,294,175,119,0
+Firearm,origin,44287,24292,19384,611
+"Transport, other land",origin,260,161,99,0
+Struck by/against,origin,265,0,265,0
+Suffocation,origin,12910,12495,415,0
+Other specified and classifiable,origin,842,638,187,17
+Other specified / NEC,origin,704,125,450,129
+Unspecified,origin,1484,86,1375,23
+Drug Poisoning,origin,4497,4329,168,0
+Non-Drug Poisoning,origin,1210,1199,11,0
